@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.expo.sensorplotter.ChartController">
+   <children>
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="720.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <LineChart fx:id="sensorChart" cache="true" cacheHint="SPEED" createSymbols="false" legendVisible="false" prefHeight="529.0" prefWidth="1280.0" title="Accelometer data" verticalZeroLineVisible="false" VBox.vgrow="ALWAYS">
+              <xAxis>
+                <NumberAxis fx:id="timeAxis" cache="true" cacheHint="SPEED" forceZeroInRange="false" label="Time [s]" side="BOTTOM" tickLength="2.0" upperBound="200.0" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis fx:id="gAxis" autoRanging="false" cache="true" cacheHint="SPEED" label="g-forces" side="LEFT" />
+              </yAxis>
+            </LineChart>
+            <ToolBar maxWidth="1.7976931348623157E308" prefHeight="40.0" prefWidth="1280.0" VBox.vgrow="ALWAYS">
+               <items>
+                  <ToggleButton fx:id="connButton" mnemonicParsing="false" text="Connect" />
+                  <ChoiceBox fx:id="serialDevBox" prefWidth="150.0" />
+               </items>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </ToolBar>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
