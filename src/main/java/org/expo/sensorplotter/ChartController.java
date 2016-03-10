@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,16 +44,11 @@ public class ChartController implements Initializable {
     private final static int REFRESH_RATE = 150;
     private int numOfSamples = 0;
     
-    private Timer timer;
-    
     private Series<Number, Number> sensorDataSeries;
     private Serial serialPort;
     
     private Collection<Data<Number, Number>> dataCollection;
-    private Random ranData;
     
-    @FXML
-    private NumberAxis gAxis;
     @FXML
     private NumberAxis timeAxis;
     @FXML
@@ -67,7 +61,6 @@ public class ChartController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        ranData = new Random();
         serialPort = new Serial("");
         // Chart and chartdata
         dataCollection = new ArrayList<>();
@@ -109,8 +102,7 @@ public class ChartController implements Initializable {
                 serialPort.close();
             }
         });
-        timer = new Timer("DataTimer");
-        timer.schedule(new TimerTask() {
+        new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 synchronized(sensorDataSeries) {
@@ -124,6 +116,6 @@ public class ChartController implements Initializable {
                     });
                 }
             }
-        }, 0, 50);
+        }, 0, REFRESH_RATE);
     }    
 }

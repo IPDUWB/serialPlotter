@@ -82,9 +82,9 @@ public class Serial {
             sp = new SerialPort(serialPort);
             if(sp.openPort()) {
                 sp.setParams(baudrate, 
-                  SerialPort.DATABITS_8, 
-                  SerialPort.STOPBITS_1, 
-                  SerialPort.PARITY_NONE);
+                        SerialPort.DATABITS_8, 
+                        SerialPort.STOPBITS_1, 
+                        SerialPort.PARITY_NONE);
                 sp.setEventsMask(SerialPort.MASK_RXCHAR);
                 sp.addEventListener(event -> {
                     if(event.isRXCHAR()) {
@@ -93,7 +93,7 @@ public class Serial {
                             String s  = stringBuilder.toString();
                             if(s.contains("\n")) {
                                 if(!s.substring(0, s.indexOf("\n")).equals(""))
-                                    data.set(s.substring(0, s.indexOf("\n")));
+                                        data.set(s.substring(0, s.indexOf("\n")));
                                 stringBuilder = new StringBuilder();
                             }
                         } catch(SerialPortException e) {

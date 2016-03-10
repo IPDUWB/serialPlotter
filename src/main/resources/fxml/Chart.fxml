@@ -17,7 +17,7 @@
                 <NumberAxis fx:id="timeAxis" cache="true" cacheHint="SPEED" forceZeroInRange="false" label="Time [s]" side="BOTTOM" tickLength="2.0" upperBound="200.0" />
               </xAxis>
               <yAxis>
-                <NumberAxis fx:id="gAxis" autoRanging="false" cache="true" cacheHint="SPEED" label="g-forces" side="LEFT" />
+                <NumberAxis autoRanging="false" cache="true" cacheHint="SPEED" label="g-forces" side="LEFT" />
               </yAxis>
             </LineChart>
             <ToolBar maxWidth="1.7976931348623157E308" prefHeight="40.0" prefWidth="1280.0" VBox.vgrow="ALWAYS">
