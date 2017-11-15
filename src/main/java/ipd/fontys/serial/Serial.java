@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.expo.serial;
+package ipd.fontys.serial;
 
 import java.io.File;
 import java.util.ArrayList;
