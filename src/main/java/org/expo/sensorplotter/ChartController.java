@@ -39,22 +39,19 @@ import jssc.SerialPort;
 import org.expo.serial.Serial;
 
 public class ChartController implements Initializable {
-    
+
     private final static int MAX_SAMPLES = 40;
     private final static int REFRESH_RATE = 150;
     private int xNumOfSamples = 0;
-    private int zNumOfSamples = 0;
-    private int yNumOfSamples = 0;
-    
+
+
     private Series<Number, Number> xDataSeries;
-    private Series<Number, Number> zDataSeries;
-    private Series<Number, Number> yDataSeries;
+
     private Serial serialPort;
-    
+
     private Collection<Data<Number, Number>> xDataCollection;
-    private Collection<Data<Number, Number>> zDataCollection;
-    private Collection<Data<Number, Number>> yDataCollection;
-    
+
+
     @FXML
     private NumberAxis timeAxis;
     @FXML
@@ -63,23 +60,19 @@ public class ChartController implements Initializable {
     private ChoiceBox<String> serialDevBox;
     @FXML
     private LineChart<Number, Number> sensorChart;
-    
-    
+
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         serialPort = new Serial("");
         // Chart and chartdata
         xDataCollection = new ArrayList<>();
-        yDataCollection = new ArrayList<>();
-        zDataCollection = new ArrayList<>();
-        zDataSeries = new Series<>();
-        yDataSeries = new Series<>();
         xDataSeries = new Series<>();
         timeAxis.setTickLabelFormatter(new StringConverter<Number>(){
             @Override
             public String toString(Number t) {
                 return new SimpleDateFormat("HH:mm:ss").
-                    format(new Date(t.longValue()));
+                        format(new Date(t.longValue()));
             }
             @Override
             public Number fromString(String string) {
@@ -88,10 +81,7 @@ public class ChartController implements Initializable {
         });
         xDataSeries.setName("X");
         sensorChart.getData().add(xDataSeries);
-        yDataSeries.setName("Y");
-        sensorChart.getData().add(yDataSeries);
-        zDataSeries.setName("Z");
-        sensorChart.getData().add(zDataSeries);
+
         // Serial port choicebpox
         serialDevBox.getItems().setAll(Serial.getSerialPorts());
         serialDevBox.getSelectionModel().selectFirst();
@@ -103,25 +93,17 @@ public class ChartController implements Initializable {
                 int end = newVal.indexOf(">");
                 System.out.println("Index begin: "+ begin + " Index end: " + end);
                 double value = Double.valueOf(
-                        newVal.substring(begin, 
+                        newVal.substring(begin,
                                 end).trim());
                 if(newVal.contains("x")) {
                     xDataCollection.add(
-                        new Data<>(System.currentTimeMillis(),
-                            value));
-                } else if(newVal.contains("z")) {
-                    zDataCollection.add(
-                        new Data<>(System.currentTimeMillis(),
-                            value));
-                } else if(newVal.contains("y")) {
-                    yDataCollection.add(
-                        new Data<>(System.currentTimeMillis(),
-                            value));
+                            new Data<>(System.currentTimeMillis(),
+                                    value));
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
             }
-            
+
         });
         connButton.setOnAction((ActionEvent event) -> {
             if(connButton.isSelected()) {
@@ -139,26 +121,14 @@ public class ChartController implements Initializable {
                 synchronized(xDataSeries) {
                     Platform.runLater(()-> {
                         xDataSeries.getData().addAll(xDataCollection);
-                        yDataSeries.getData().addAll(yDataCollection);
-                        zDataSeries.getData().addAll(zDataCollection);
                         xNumOfSamples = xDataSeries.getData().size();
-                        zNumOfSamples = zDataSeries.getData().size();
-                        yNumOfSamples = yDataSeries.getData().size();
                         if(xNumOfSamples > MAX_SAMPLES)
-                            xDataSeries.getData().remove(0, 
-                                    xNumOfSamples - MAX_SAMPLES);
-                        if(yNumOfSamples > MAX_SAMPLES)
-                            yDataSeries.getData().remove(0, 
-                                    xNumOfSamples - MAX_SAMPLES);
-                        if(zNumOfSamples > MAX_SAMPLES)
-                            zDataSeries.getData().remove(0, 
+                            xDataSeries.getData().remove(0,
                                     xNumOfSamples - MAX_SAMPLES);
                         xDataCollection.clear();
-                        zDataCollection.clear();
-                        yDataCollection.clear();
                     });
                 }
             }
         }, 0, REFRESH_RATE);
-    }    
+    }
 }

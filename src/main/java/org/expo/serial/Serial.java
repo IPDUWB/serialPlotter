@@ -31,12 +31,12 @@ import jssc.SerialPortException;
  * @author bart452
  */
 public class Serial {
-    
+
     private String serialPort;
     private StringBuilder stringBuilder = new StringBuilder();
     private SerialPort sp;
     private final StringProperty data = new SimpleStringProperty("");
-    
+
     /**
      * Open a serialport
      * @param port Device file to open e.g. "/dev/ttyUSB0"
@@ -50,18 +50,18 @@ public class Serial {
             }
         }));
     }
-    
+
     /**
      * Change the serial device. If the serial device is already opened, it will
      * be closed.
-     * @param serialPort 
+     * @param serialPort
      */
     public void setSerialPort(String serialPort) {
         if(isOpen())
             close();
         this.serialPort = serialPort;
     }
-    
+
     /**
      * Get the name of the currently opened port
      * @return serialport devicefile name
@@ -69,8 +69,8 @@ public class Serial {
     public String getPortName() {
         return serialPort;
     }
-    
-    
+
+
     /**
      * Open the serialport and create a connection. This function creates a
      * event listener that is triggerd when serial data is available
@@ -81,9 +81,9 @@ public class Serial {
         try {
             sp = new SerialPort(serialPort);
             if(sp.openPort()) {
-                sp.setParams(baudrate, 
-                        SerialPort.DATABITS_8, 
-                        SerialPort.STOPBITS_1, 
+                sp.setParams(baudrate,
+                        SerialPort.DATABITS_8,
+                        SerialPort.STOPBITS_1,
                         SerialPort.PARITY_NONE);
                 sp.setEventsMask(SerialPort.MASK_RXCHAR);
                 sp.addEventListener(event -> {
@@ -93,7 +93,7 @@ public class Serial {
                             String s  = stringBuilder.toString();
                             if(s.contains("\n")) {
                                 if(!s.substring(0, s.indexOf("\n")).equals(""))
-                                        data.set(s.substring(0, s.indexOf("\n")));
+                                    data.set(s.substring(0, s.indexOf("\n")));
                                 stringBuilder = new StringBuilder();
                             }
                         } catch(SerialPortException e) {
@@ -108,7 +108,7 @@ public class Serial {
         }
         return (sp != null);
     }
-    
+
     /**
      * Write a byte to the serialport. Serial device has to be opened
      * @param data Bytes to write
@@ -120,7 +120,7 @@ public class Serial {
             System.err.println("Failed to write byte \n" +  e);
         }
     }
-    
+
     /**
      * Write a byte array to the serialport. The device has to be open
      * @param data Bytes to write
@@ -132,7 +132,7 @@ public class Serial {
             System.err.println("Failed to write byte \n" +  e);
         }
     }
-    
+
     /**
      * Get the data from the serial device
      * @return The data received
@@ -140,7 +140,7 @@ public class Serial {
     public String getData() {
         return data.get();
     }
-    
+
     /**
      * Add a callback when data is received
      * @param listener The callback to trigger when data is received
@@ -148,7 +148,7 @@ public class Serial {
     public void addListener(ChangeListener<String> listener) {
         data.addListener(listener);
     }
-    
+
     /**
      * Test if the serial port is open
      * @return true is open, false is closed
@@ -156,7 +156,7 @@ public class Serial {
     public boolean isOpen() {
         return sp == null ? false : sp.isOpened();
     }
-    
+
     /**
      * Close the serial device
      */
@@ -172,14 +172,15 @@ public class Serial {
         }
         System.out.println("Closed serialport");
     }
-    
+
     public static ArrayList<String> getSerialPorts() {
         return Arrays.asList(new File("/dev").listFiles())
                 .stream()
-                .filter((file) -> (file.getName().contains("USB") 
+                .filter((file) -> (file.getName().contains("USB")
+                        || file.getName().contains("cu.")
                         || file.getName().contains("ACM")))
                 .map(File::getAbsolutePath)
                 .collect(Collectors.toCollection(ArrayList<String>::new));
     }
-    
+
 }
