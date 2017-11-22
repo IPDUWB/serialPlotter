@@ -88,27 +88,20 @@ public class ChartController implements Initializable {
         // Serial port connection button
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
-                System.out.println(newVal);
-                int begin = newVal.indexOf("<") + 1;
-                int end = newVal.indexOf(">");
-                System.out.println("Index begin: "+ begin + " Index end: " + end);
-                double value = Double.valueOf(
-                        newVal.substring(begin,
-                                end).trim());
+                System.out.println("New Value is" + newVal);
                 if(newVal.contains("x")) {
                     xDataCollection.add(
                             new Data<>(System.currentTimeMillis(),
-                                    value));
+                                    Double.valueOf(newVal.replace("x",""))));
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
             }
-
         });
         connButton.setOnAction((ActionEvent event) -> {
             if(connButton.isSelected()) {
                 serialPort.setSerialPort(serialDevBox.getValue());
-                if(!serialPort.open(SerialPort.BAUDRATE_9600)) {
+                if(!serialPort.open(SerialPort.BAUDRATE_115200)) {
                     connButton.setSelected(false);
                 }
             } else {
