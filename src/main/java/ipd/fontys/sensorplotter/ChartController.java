@@ -67,7 +67,7 @@ public class ChartController implements Initializable {
                 if(newVal.contains("x")) {
                     xDataCollection.add(
                             new XYChart.Data<>(System.currentTimeMillis(),
-                                    Double.valueOf(newVal.replace("x",""))));
+                                    Double.valueOf(newVal.replaceAll("[a-z]",""))));
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);

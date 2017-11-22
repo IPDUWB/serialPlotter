@@ -1,7 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
-      prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"/>
+<VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ipd.fontys.sensorplotter.DistanceController">
+   <children>
+      <Text fill="#a89d9d" strokeType="OUTSIDE" strokeWidth="0.0" text="Distance [m]" />
+      <TextField fx:id="textValue" editable="false" maxWidth="200.0">
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </TextField>
+      <Slider fx:id="sliderValue" max="5.0" maxWidth="500.0" showTickLabels="true" showTickMarks="true" />
+       <LineChart fx:id="sensorChart" cache="true" cacheHint="SPEED" createSymbols="false" prefHeight="529.0" prefWidth="1280.0" title="Distance data" verticalZeroLineVisible="false" VBox.vgrow="ALWAYS">
+           <xAxis>
+               <NumberAxis fx:id="timeAxis" animated="false" cache="true" cacheHint="SPEED" forceZeroInRange="false" label="Time [s]" side="BOTTOM" tickLength="2.0" upperBound="200.0" />
+           </xAxis>
+           <yAxis>
+               <NumberAxis animated="false" cache="true" cacheHint="SPEED" label="Distance[m]" minorTickCount="20" side="LEFT" />
+           </yAxis>
+       </LineChart>
+   </children>
+</VBox>
