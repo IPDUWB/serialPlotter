@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane id="BorderPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ipd.fontys.sensorplotter.ContainerController">
+    <center>
+      <TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <tabs>
+             <Tab fx:id="dataRateTab" closable="false" text="Data Rate" />
+            <Tab fx:id="distanceTab" closable="false" text="Distance" />
+         </tabs>
+      </TabPane>
+    </center>
+   <bottom>
+          <ToolBar maxWidth="1.7976931348623157E308" prefHeight="40.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
+              <items>
+                  <ToggleButton fx:id="connButton" mnemonicParsing="false" text="Connect" />
+                  <ChoiceBox fx:id="serialDevBox" prefWidth="150.0" />
+              </items>
+          </ToolBar>
+   </bottom>
+</BorderPane>

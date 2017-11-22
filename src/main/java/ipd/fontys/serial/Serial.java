@@ -47,12 +47,7 @@ public class Serial {
      */
     public Serial(String port) {
         serialPort = port;
-        Runtime.getRuntime().addShutdownHook((new Thread() {
-            @Override
-            public void run() {
-                close();
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook((new Thread(() -> close())));
     }
 
     /**

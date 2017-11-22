@@ -27,12 +27,12 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Chart.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Container.fxml"));
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         
-        stage.setTitle("ShoeSensor Plotter");
+        stage.setTitle("Ultra Wide-Band Demo");
         stage.setScene(scene);
         stage.show();
     }
