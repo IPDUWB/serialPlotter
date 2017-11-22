@@ -83,7 +83,7 @@ public class ChartController implements Initializable {
         sensorChart.getData().add(xDataSeries);
 
         // Serial port choicebpox
-        //serialDevBox.getItems().setAll(Serial.getSerialPorts());
+        serialDevBox.getItems().setAll(Serial.getSerialPorts());
         serialDevBox.getSelectionModel().selectFirst();
         // Serial port connection button
         serialPort.addListener((obs, oldVal, newVal) -> {
