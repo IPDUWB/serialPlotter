@@ -16,58 +16,39 @@
 
 package ipd.fontys.sensorplotter;
 
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import ipd.fontys.serial.Serial;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ToggleButton;
 import javafx.util.StringConverter;
-import jssc.SerialPort;
-import ipd.fontys.serial.Serial;
+
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ChartController implements Initializable {
 
     private final static int MAX_SAMPLES = 40;
     private final static int REFRESH_RATE = 150;
+
     private int xNumOfSamples = 0;
-
-
-    private Series<Number, Number> xDataSeries;
-
-    private Serial serialPort;
-
-    private Collection<Data<Number, Number>> xDataCollection;
-
+    private final Series<Number, Number> xDataSeries = new Series<>();
+    private final Collection<Data<Number, Number>> xDataCollection = new ArrayList<>();
 
     @FXML
     private NumberAxis timeAxis;
-    @FXML
-    private ToggleButton connButton;
-    @FXML
-    private ChoiceBox<String> serialDevBox;
+
     @FXML
     private LineChart<Number, Number> sensorChart;
 
-
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        serialPort = new Serial("");
         // Chart and chartdata
-        xDataCollection = new ArrayList<>();
-        xDataSeries = new Series<>();
         timeAxis.setTickLabelFormatter(new StringConverter<Number>(){
             @Override
             public String toString(Number t) {
@@ -79,35 +60,22 @@ public class ChartController implements Initializable {
                 throw new UnsupportedOperationException("Not supported");
             }
         });
-        xDataSeries.setName("X");
-        sensorChart.getData().add(xDataSeries);
-
-        // Serial port choicebpox
-        serialDevBox.getItems().setAll(Serial.getSerialPorts());
-        serialDevBox.getSelectionModel().selectFirst();
-        // Serial port connection button
+        Serial serialPort = ContainerController.getInstance().getSerial();
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
                 System.out.println("New Value is" + newVal);
                 if(newVal.contains("x")) {
                     xDataCollection.add(
-                            new Data<>(System.currentTimeMillis(),
+                            new XYChart.Data<>(System.currentTimeMillis(),
                                     Double.valueOf(newVal.replace("x",""))));
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
             }
         });
-        connButton.setOnAction((ActionEvent event) -> {
-            if(connButton.isSelected()) {
-                serialPort.setSerialPort(serialDevBox.getValue());
-                if(!serialPort.open(SerialPort.BAUDRATE_115200)) {
-                    connButton.setSelected(false);
-                }
-            } else {
-                serialPort.close();
-            }
-        });
+        xDataSeries.setName("X");
+        sensorChart.getData().add(xDataSeries);
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
