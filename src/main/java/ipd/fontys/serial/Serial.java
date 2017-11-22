@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.expo.serial;
+package ipd.fontys.serial;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import jssc.SerialPortList;
+import org.apache.commons.lang3.SystemUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -54,7 +58,7 @@ public class Serial {
     /**
      * Change the serial device. If the serial device is already opened, it will
      * be closed.
-     * @param serialPort
+     * @param serialPort Name of the serialPort to connect to
      */
     public void setSerialPort(String serialPort) {
         if(isOpen())
@@ -154,7 +158,7 @@ public class Serial {
      * @return true is open, false is closed
      */
     public boolean isOpen() {
-        return sp == null ? false : sp.isOpened();
+        return sp != null && sp.isOpened();
     }
 
     /**
@@ -174,13 +178,15 @@ public class Serial {
     }
 
     public static ArrayList<String> getSerialPorts() {
-        return Arrays.asList(new File("/dev").listFiles())
-                .stream()
+        if(SystemUtils.IS_OS_WINDOWS) {
+            return new ArrayList<>(Arrays.asList(SerialPortList.getPortNames(Pattern.compile("COM[2-9]"))));
+        }
+        return Arrays.stream(new File("/dev").listFiles())
                 .filter((file) -> (file.getName().contains("USB")
                         || file.getName().contains("cu.")
                         || file.getName().contains("ACM")))
                 .map(File::getAbsolutePath)
-                .collect(Collectors.toCollection(ArrayList<String>::new));
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

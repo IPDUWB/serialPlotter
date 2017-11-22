@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.expo.sensorplotter;
+package ipd.fontys.sensorplotter;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.expo.sensorplotter;
+package ipd.fontys.sensorplotter;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -36,7 +36,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleButton;
 import javafx.util.StringConverter;
 import jssc.SerialPort;
-import org.expo.serial.Serial;
+import ipd.fontys.serial.Serial;
 
 public class ChartController implements Initializable {
 
