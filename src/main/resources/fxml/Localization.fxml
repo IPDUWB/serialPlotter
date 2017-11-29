@@ -6,7 +6,7 @@
 
 <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <BubbleChart maxHeight="720.0" maxWidth="720.0" prefHeight="720.0" title="Localization">
+      <BubbleChart fx:id="bubbleChart" maxHeight="720.0" maxWidth="720.0" prefHeight="720.0" title="Localization">
         <xAxis>
           <NumberAxis autoRanging="false" side="BOTTOM" />
         </xAxis>

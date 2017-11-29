@@ -18,6 +18,7 @@ package ipd.fontys.sensorplotter;
 
 import ipd.fontys.serial.Serial;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
@@ -35,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DataRateController implements Initializable {
 
-    private final static int MAX_SAMPLES = 200;
+    private final static int MAX_SAMPLES = 300;
 
     private int numOfSamples = 0;
     private final Series<Number, Number> dataSeries = new Series<>();
@@ -73,7 +74,9 @@ public class DataRateController implements Initializable {
                             new XYChart.Data<>(System.currentTimeMillis(),
                                     Double.valueOf(newVal.replaceAll("[a-z]",""))));
                     double distance = Double.valueOf(newVal.replaceAll("[a-z]",""));
-                    textVal.setText(newVal.replaceAll("[a-z]",""));
+                    Platform.runLater(() -> {
+                        textVal.setText(newVal.replaceAll("[a-z]",""));
+                    });
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
