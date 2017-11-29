@@ -34,6 +34,7 @@ public class DistanceController implements Initializable {
     private TextField textValue;
 
     @Override
+    @SuppressWarnings("Duplicates")
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Chart and chartdata
             timeAxis.setTickLabelFormatter(new StringConverter<Number>(){
