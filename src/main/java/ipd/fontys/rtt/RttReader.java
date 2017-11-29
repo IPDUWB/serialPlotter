@@ -9,8 +9,6 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,14 +24,12 @@ public class RttReader implements Closeable {
      * the Semaphore at -3 because they shouldn't count as response.
      */
     private final static int SEM_INIT_VAL = -3;
-    private final static String GDB_SERVER_COMMAND = "JLinkGDBServer -device STM32F412ZG -speed 4000 -if SWD";
 
     private final Process gdbServer;
 
     private final EventLoopGroup workGroup = new NioEventLoopGroup();
     private final Semaphore responseSem;
     private final AtomicReference<String> rttResponse;
-    private final StringProperty stringProperty = new SimpleStringProperty();
 
     private final static Bootstrap bootstrap = new Bootstrap()
             .group(new NioEventLoopGroup())
