@@ -16,7 +16,7 @@
 
 package ipd.fontys.sensorplotter;
 
-import ipd.fontys.serial.Serial;
+import ipd.fontys.rtt.RttReader;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -26,17 +26,22 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DataRateController implements Initializable {
 
-    private final static int MAX_SAMPLES = 300;
+    private final static int MAX_SAMPLES = 10;
 
     private int numOfSamples = 0;
     private final Series<Number, Number> dataSeries = new Series<>();
@@ -52,12 +57,13 @@ public class DataRateController implements Initializable {
     private TextField textVal;
 
     @Override
+    @SuppressWarnings("Duplicates")
     public void initialize(URL url, ResourceBundle rb) {
         // Chart and chartdata
         timeAxis.setTickLabelFormatter(new StringConverter<Number>(){
             @Override
             public String toString(Number t) {
-                return new SimpleDateFormat("HH:mm:ss").
+                return new SimpleDateFormat("mm:ss").
                         format(new Date(t.longValue()));
             }
             @Override
@@ -65,23 +71,39 @@ public class DataRateController implements Initializable {
                 throw new UnsupportedOperationException("Not supported");
             }
         });
-        Serial serialPort = ContainerController.getInstance().getSerial();
-        serialPort.addListener((obs, oldVal, newVal) -> {
-            try {
-                System.out.println("New Value is" + newVal);
-                if(newVal.contains("y")) {
-                    dataCollection.add(
-                            new XYChart.Data<>(System.currentTimeMillis(),
-                                    Double.valueOf(newVal.replaceAll("[a-z]",""))));
-                    double distance = Double.valueOf(newVal.replaceAll("[a-z]",""));
+        RttReader reader;
+        try {
+            reader = new RttReader();
+            reader.connect("localhost", 19021);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Unable to read from localhost:19021");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        Thread readerThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                String msg = reader.getMessage();
+                if(msg.startsWith("t")) {
+                    int time = Integer.valueOf(StringUtils.substringBetween(msg, "time:", ";"));
+                    int data = Integer.valueOf(StringUtils.substringAfter(msg, "len:"));
+                    double dataRate = (double) data / (time * 1000) * 8;
+                    dataCollection.add(new XYChart.Data<>(System.currentTimeMillis(), dataRate));
+
                     Platform.runLater(() -> {
-                        textVal.setText(newVal.replaceAll("[a-z]",""));
+                        textVal.setText(String.format("%.3f Mbit/s", dataRate));
                     });
                 }
-            } catch(NumberFormatException e) {
-                e.printStackTrace(System.err);
             }
         });
+
+        readerThread.setDaemon(true);
+        readerThread.start();
+
         dataSeries.setName("Data Rate");
         sensorChart.getData().add(dataSeries);
 
