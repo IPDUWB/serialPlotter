@@ -17,13 +17,15 @@ import java.util.ResourceBundle;
 public class ContainerController implements Initializable {
 
     @FXML
-    public Tab distanceTab;
+    private Tab distanceTab;
     @FXML
-    public Tab dataRateTab;
+    private Tab dataRateTab;
     @FXML
     private ToggleButton connButton;
     @FXML
     private ChoiceBox<String> serialDevBox;
+    @FXML
+    private Tab localizationTab;
 
     private Serial serialPort;
 
@@ -55,6 +57,7 @@ public class ContainerController implements Initializable {
         try {
             distanceTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/Distance.fxml")));
             dataRateTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/DataRate.fxml")));
+            localizationTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/Localization.fxml")));
         } catch (IOException e) {
             e.printStackTrace();
         }
