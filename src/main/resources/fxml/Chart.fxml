@@ -3,19 +3,14 @@
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.VBox?>
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="720.0" prefWidth="1280.0"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ipd.fontys.sensorplotter.ChartController">
-    <LineChart fx:id="sensorChart" cache="true" cacheHint="SPEED" createSymbols="false" prefHeight="529.0"
-               prefWidth="1280.0" title="Distance data" verticalZeroLineVisible="false" VBox.vgrow="ALWAYS">
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ipd.fontys.sensorplotter.ChartController">
+    <LineChart fx:id="sensorChart" animated="false" cache="true" cacheHint="SPEED" createSymbols="false" prefHeight="529.0" prefWidth="1280.0" title="Distance data" verticalZeroLineVisible="false" VBox.vgrow="ALWAYS">
         <xAxis>
-            <NumberAxis fx:id="timeAxis" animated="false" cache="true" cacheHint="SPEED" forceZeroInRange="false"
-                        label="Time [s]" side="BOTTOM" tickLength="2.0" upperBound="200.0"/>
+            <NumberAxis fx:id="timeAxis" animated="false" cache="true" cacheHint="SPEED" forceZeroInRange="false" label="Time [s]" side="BOTTOM" tickLength="2.0" upperBound="200.0" />
         </xAxis>
         <yAxis>
-            <NumberAxis animated="false" cache="true" cacheHint="SPEED" label="Distance[m]" minorTickCount="20"
-                        side="LEFT"/>
+            <NumberAxis animated="false" cache="true" cacheHint="SPEED" label="Distance[m]" minorTickCount="20" side="LEFT" />
         </yAxis>
     </LineChart>
 </VBox>

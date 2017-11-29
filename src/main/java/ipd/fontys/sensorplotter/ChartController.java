@@ -17,7 +17,7 @@
 package ipd.fontys.sensorplotter;
 
 import ipd.fontys.serial.Serial;
-import javafx.application.Platform;
+import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
@@ -30,15 +30,15 @@ import javafx.util.StringConverter;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChartController implements Initializable {
 
-    private final static int MAX_SAMPLES = 40;
-    private final static int REFRESH_RATE = 150;
+    private final static int MAX_SAMPLES = 200;
 
-    private int xNumOfSamples = 0;
-    private final Series<Number, Number> xDataSeries = new Series<>();
-    private final Collection<Data<Number, Number>> xDataCollection = new ArrayList<>();
+    private int numOfSamples = 0;
+    private final Series<Number, Number> dataSeries = new Series<>();
+    private final Collection<Data<Number, Number>> dataCollection = new CopyOnWriteArrayList<>();
 
     @FXML
     private NumberAxis timeAxis;
@@ -65,7 +65,7 @@ public class ChartController implements Initializable {
             try {
                 System.out.println("New Value is" + newVal);
                 if(newVal.contains("x")) {
-                    xDataCollection.add(
+                    dataCollection.add(
                             new XYChart.Data<>(System.currentTimeMillis(),
                                     Double.valueOf(newVal.replaceAll("[a-z]",""))));
                 }
@@ -73,23 +73,19 @@ public class ChartController implements Initializable {
                 e.printStackTrace(System.err);
             }
         });
-        xDataSeries.setName("X");
-        sensorChart.getData().add(xDataSeries);
+        dataSeries.setName("X");
+        sensorChart.getData().add(dataSeries);
 
-        new Timer().schedule(new TimerTask() {
+        new AnimationTimer() {
             @Override
-            public void run() {
-                synchronized(xDataSeries) {
-                    Platform.runLater(()-> {
-                        xDataSeries.getData().addAll(xDataCollection);
-                        xNumOfSamples = xDataSeries.getData().size();
-                        if(xNumOfSamples > MAX_SAMPLES)
-                            xDataSeries.getData().remove(0,
-                                    xNumOfSamples - MAX_SAMPLES);
-                        xDataCollection.clear();
-                    });
-                }
+            public void handle(long l) {
+                dataSeries.getData().addAll(dataCollection);
+                numOfSamples = dataSeries.getData().size();
+                if(numOfSamples > MAX_SAMPLES)
+                    dataSeries.getData().remove(0,
+                            numOfSamples - MAX_SAMPLES);
+                dataCollection.clear();
             }
-        }, 0, REFRESH_RATE);
+        }.start();
     }
 }
