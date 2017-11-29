@@ -47,7 +47,7 @@ public class Serial {
      */
     public Serial(String port) {
         serialPort = port;
-        Runtime.getRuntime().addShutdownHook((new Thread(() -> close())));
+        Runtime.getRuntime().addShutdownHook((new Thread(this::close)));
     }
 
     /**
