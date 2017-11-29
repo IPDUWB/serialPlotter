@@ -14,6 +14,7 @@ import javafx.util.StringConverter;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DistanceController implements Initializable {
 
@@ -21,7 +22,7 @@ public class DistanceController implements Initializable {
     private final static int REFRESH_RATE = 150;
     private int xNumOfSamples = 0;
     private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
-    private final Collection<XYChart.Data<Number, Number>> xDataCollection = new ArrayList<>();
+    private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
     @FXML
     private Slider sliderValue;
     @FXML
@@ -55,16 +56,17 @@ public class DistanceController implements Initializable {
                     xDataCollection.add(
                             new XYChart.Data<>(System.currentTimeMillis(),
                                     Double.valueOf(newVal.replaceAll("[a-z]",""))));
+                    double distance = Double.valueOf(newVal.replaceAll("[a-z]",""));
+                    sliderValue.setValue(distance);
+                    textValue.setText(newVal.replaceAll("[a-z]",""));
                 }
-                double distance = Double.valueOf(newVal.replaceAll("[a-z]",""));
-                sliderValue.setValue(distance);
-                textValue.setText(newVal.replaceAll("[a-z]",""));
+
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
             }
         });
 
-        xDataSeries.setName("X");
+        xDataSeries.setName("Distance");
         sensorChart.getData().add(xDataSeries);
 
         new Timer().schedule(new TimerTask() {

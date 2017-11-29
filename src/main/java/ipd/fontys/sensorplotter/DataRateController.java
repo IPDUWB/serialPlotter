@@ -25,6 +25,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 
 import java.net.URL;
@@ -32,7 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ChartController implements Initializable {
+public class DataRateController implements Initializable {
 
     private final static int MAX_SAMPLES = 200;
 
@@ -45,6 +46,9 @@ public class ChartController implements Initializable {
 
     @FXML
     private LineChart<Number, Number> sensorChart;
+
+    @FXML
+    private TextField textVal;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -64,16 +68,18 @@ public class ChartController implements Initializable {
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
                 System.out.println("New Value is" + newVal);
-                if(newVal.contains("x")) {
+                if(newVal.contains("y")) {
                     dataCollection.add(
                             new XYChart.Data<>(System.currentTimeMillis(),
                                     Double.valueOf(newVal.replaceAll("[a-z]",""))));
+                    double distance = Double.valueOf(newVal.replaceAll("[a-z]",""));
+                    textVal.setText(newVal.replaceAll("[a-z]",""));
                 }
             } catch(NumberFormatException e) {
                 e.printStackTrace(System.err);
             }
         });
-        dataSeries.setName("X");
+        dataSeries.setName("Data Rate");
         sensorChart.getData().add(dataSeries);
 
         new AnimationTimer() {

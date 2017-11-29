@@ -54,7 +54,7 @@ public class ContainerController implements Initializable {
         // This needs to be done last always!!
         try {
             distanceTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/Distance.fxml")));
-            dataRateTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/Chart.fxml")));
+            dataRateTab.setContent(FXMLLoader.load(getClass().getResource("/fxml/DataRate.fxml")));
         } catch (IOException e) {
             e.printStackTrace();
         }
