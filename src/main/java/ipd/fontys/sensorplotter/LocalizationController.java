@@ -16,15 +16,15 @@ public class LocalizationController implements Initializable {
     private int xNumOfSamples = 0;
     private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
     private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
-    private double r1Beacon = 3.81;
-    private double x1Beacon = 1.01;
-    private double y1Beacon = 0.6;
-    private double r2Beacon = 0.79;
-    private double x2Beacon = 5.4;
-    private double y2Beacon = 1.8;
-    private double r3Beacon = 4.94;
-    private double x3Beacon = 3;
-    private double y3Beacon = 6;
+    private double r1Beacon = 20;
+    private double x1Beacon = 10;
+    private double y1Beacon = 10;
+    private double r2Beacon = 31.6227766;
+    private double x2Beacon = 60;
+    private double y2Beacon = 20;
+    private double r3Beacon = 29.222594;
+    private double x3Beacon = 42.12;
+    private double y3Beacon = 36.59;
     private double x1Tag;
     private double y1Tag;
     private double x2Tag;
@@ -35,13 +35,11 @@ public class LocalizationController implements Initializable {
     private double y4Tag;
     private double xTag;
     private double yTag;
-
-
-
-
     double[] value1Array = new double[4];
     double[] value2Array = new double[4];
-
+    double[] difArrayX = new double[6];
+    double[] difArrayY = new double[6];
+    private int remember = 0;
     @FXML
     private BubbleChart<Number, Number> bubbleChart;
 
@@ -61,9 +59,7 @@ public class LocalizationController implements Initializable {
                 if (newVal.contains("z")) {
                     //r3Beacon = Double.valueOf(newVal.replaceAll("[a-z]", ""));
                 }
-               // System.out.println("test1" + r1Beacon);
-              //  System.out.println("test2" + r2Beacon);
-              //  System.out.println("test3" + r3Beacon);
+
                 value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon);
                 y1Tag = value1Array[0];
                 y2Tag = value1Array[1];
@@ -74,12 +70,58 @@ public class LocalizationController implements Initializable {
                 y4Tag = value2Array[1];
                 x3Tag = value2Array[2];
                 x4Tag = value2Array[3];
+                //Calculate x value
+                difArrayX[0] = x1Tag-x2Tag;
+                difArrayX[1] = x1Tag-x3Tag;
+                difArrayX[2] = x1Tag-x4Tag;
+                difArrayX[3] = x2Tag-x3Tag;
+                difArrayX[4] = x2Tag-x4Tag;
+                difArrayX[5] = x3Tag-x4Tag;
 
+                xTag = Math.sqrt(difArrayX[0]*difArrayX[0]);;
+                int i;
+                for ( i = 1; i < 6; i++) {
+                    difArrayX[i] = Math.sqrt(difArrayX[i]*difArrayX[i]);
+                    if (xTag > difArrayX[i]){
+                        remember = i;
+                    }
+                }
+                if(remember==0 | remember==1 | remember==2){
+                    xTag = x1Tag;
+                }
+                else if(remember==3 | remember==4){
+                    xTag = x2Tag;
+                }
+                else{
+                    xTag = x3Tag;
+                }
 
-                System.out.println("c1 ( " + x1Tag + "," + y1Tag + " )");
-                System.out.println("c2 ( " + x2Tag + "," + y2Tag + " )");
-                System.out.println("c3 ( " + x3Tag + "," + y3Tag + " )");
-                System.out.println("c4 ( " + x4Tag + "," + y4Tag + " )");
+                difArrayY[0] = y1Tag-y2Tag;
+                difArrayY[1] = y1Tag-y3Tag;
+                difArrayY[2] = y1Tag-y4Tag;
+                difArrayY[3] = y2Tag-y3Tag;
+                difArrayY[4] = y2Tag-y4Tag;
+                difArrayY[5] = y3Tag-y4Tag;
+
+                yTag = Math.sqrt(difArrayY[0]*difArrayY[0]);;
+                int p;
+                for ( p = 1; p < 6; p++) {
+                    difArrayY[p] = Math.sqrt(difArrayY[p]*difArrayY[p]);
+                    if (yTag > difArrayY[p]){
+                        remember = p;
+                    }
+                }
+                if(remember==0 | remember==1 | remember==2){
+                    yTag = y1Tag;
+                }
+                else if(remember==3 | remember==4){
+                    yTag = y2Tag;
+                }
+                else{
+                    yTag = y3Tag;
+                }
+
+                System.out.println("c1 ( " + xTag + "," + yTag + " )");
 
 
 
