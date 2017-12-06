@@ -16,15 +16,15 @@ public class LocalizationController implements Initializable {
     private int xNumOfSamples = 0;
     private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
     private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
-    private double r1Beacon = 20;
-    private double x1Beacon = 10;
-    private double y1Beacon = 10;
-    private double r2Beacon = 31.6227766;
-    private double x2Beacon = 60;
-    private double y2Beacon = 20;
-    private double r3Beacon = 29.222594;
-    private double x3Beacon = 42.12;
-    private double y3Beacon = 36.59;
+    private double r1Beacon = 2.86;
+    private double x1Beacon = 4;
+    private double y1Beacon = 3;
+    private double r2Beacon = 2.99;
+    private double x2Beacon = 8;
+    private double y2Beacon = 2;
+    private double r3Beacon = 3.29;
+    private double x3Beacon = 10;
+    private double y3Beacon = 6;
     private double x1Tag;
     private double y1Tag;
     private double x2Tag;
@@ -35,11 +35,12 @@ public class LocalizationController implements Initializable {
     private double y4Tag;
     private double xTag;
     private double yTag;
-    double[] value1Array = new double[4];
-    double[] value2Array = new double[4];
+    double[] value1Array = new double[5];
+    double[] value2Array = new double[5];
     double[] difArrayX = new double[6];
     double[] difArrayY = new double[6];
     private int remember = 0;
+    private double discr = 1;
     @FXML
     private BubbleChart<Number, Number> bubbleChart;
 
@@ -60,12 +61,27 @@ public class LocalizationController implements Initializable {
                     //r3Beacon = Double.valueOf(newVal.replaceAll("[a-z]", ""));
                 }
 
-                value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon);
+                value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon, discr);
+                discr = value1Array[4];
+                while(discr == 0)
+                {
+                    r1Beacon = r1Beacon +0.1;
+                    r2Beacon = r2Beacon +0.1;
+                    value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon, discr);
+                    discr = value2Array[4];
+                }
                 y1Tag = value1Array[0];
                 y2Tag = value1Array[1];
                 x1Tag = value1Array[2];
                 x2Tag = value1Array[3];
-                value2Array = triangulation(y1Beacon,y3Beacon,x1Beacon,x3Beacon,r1Beacon,r3Beacon);
+                value2Array = triangulation(y1Beacon,y3Beacon,x1Beacon,x3Beacon,r1Beacon,r3Beacon,discr);
+                discr = value2Array[4];
+                while(discr ==0){
+                    r1Beacon = r1Beacon +0.1;
+                    r2Beacon = r2Beacon +0.1;
+                    value2Array = triangulation(y1Beacon,y3Beacon,x1Beacon,x3Beacon,r1Beacon,r3Beacon,discr);
+                    discr = value2Array[4];
+                }
                 y3Tag = value2Array[0];
                 y4Tag = value2Array[1];
                 x3Tag = value2Array[2];
@@ -149,7 +165,7 @@ public class LocalizationController implements Initializable {
         }.start();
     }
 
-        double [] triangulation (double y1Coordinate, double y2Coordinate, double x1Coordinate, double x2Coordinate, double r1Coordinate, double r2Coordinate)
+        double [] triangulation (double y1Coordinate, double y2Coordinate, double x1Coordinate, double x2Coordinate, double r1Coordinate, double r2Coordinate, double discriminant)
         {
             double A;
             double B;
@@ -159,7 +175,7 @@ public class LocalizationController implements Initializable {
             double y0;
 
             double [] array;
-            array = new double[4];
+            array = new double[5];
             double y1Tag;
             double y2Tag;
             double x1Tag;
@@ -190,11 +206,13 @@ public class LocalizationController implements Initializable {
                 array[1] = y2Tag;
                 array[2] = x1Tag;
                 array[3] = x2Tag;
+                array[4] = 1.0;
                 return array;
             }
             else
             {
-                System.out.println("Circles do not cross!");
+                array[4] = 0.0;
+               // System.out.println("Circles do not cross!");
                 return array;
             }
         }
