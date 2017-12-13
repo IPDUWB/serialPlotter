@@ -52,7 +52,7 @@ public class DistanceController implements Initializable {
         Serial serialPort = ContainerController.getInstance().getSerial();
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
-                System.out.println("New Value is" + newVal);
+                System.out.println("Distance:" + newVal);
                 if(newVal.contains("x")) {
                     xDataCollection.add(
                             new XYChart.Data<>(System.currentTimeMillis(),
