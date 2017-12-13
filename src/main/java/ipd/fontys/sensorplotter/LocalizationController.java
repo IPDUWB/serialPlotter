@@ -2,15 +2,51 @@ package ipd.fontys.sensorplotter;
 
 import ipd.fontys.serial.Serial;
 import javafx.animation.AnimationTimer;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BubbleChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LocalizationController implements Initializable {
+
+
+    @FXML
+    private TextField textFieldx1;
+
+    @FXML
+    private TextField textFieldy1;
+
+    @FXML
+    private TextField textBoxR1;
+
+    @FXML
+    private TextField textFieldx2;
+
+    @FXML
+    private TextField textFieldy2;
+
+    @FXML
+    private TextField textBoxR2;
+
+    @FXML
+    private TextField textFieldx3;
+
+    @FXML
+    private TextField textFieldy3;
+
+    @FXML
+    private TextField textBoxR3;
+
+    @FXML
+    private Button buttonLoad;
 
     private final static int MAX_SAMPLES = 40;
     private int xNumOfSamples = 0;
@@ -19,38 +55,55 @@ public class LocalizationController implements Initializable {
     double[] beacon12Array = new double[5];
     double[] beacon13Array = new double[5];
     double[] beacon23Array = new double[5];
-    private double discr = 1;
 
     //variable values
     private double rIncrement = 0.1;
 
     //objects
-    private Beacon beacon1 = new Beacon(6,4); //remove object and constructor if this should be variable
+    private Beacon beacon1 = new Beacon(6,4);
     private Beacon beacon2 = new Beacon(6,20);
     private Beacon beacon3 = new Beacon(22,8);
     private Crossing crossing12 = new Crossing();
     private Crossing crossing13 = new Crossing();
     private Crossing crossing23 = new Crossing();
 
-    @FXML
-    private BubbleChart<Number, Number> bubbleChart;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        textFieldx1.setText(Double.toString(beacon1.x));
+        textFieldx2.setText(Double.toString(beacon2.x));
+        textFieldx3.setText(Double.toString(beacon3.x));
+        textFieldy1.setText(Double.toString(beacon1.y));
+        textFieldy2.setText(Double.toString(beacon2.y));
+        textFieldy3.setText(Double.toString(beacon3.y));
         //open serial port
         Serial serialPort = ContainerController.getInstance().getSerial();
         //get radius between beacons and tag
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
+
                 if (newVal.contains("x")) { //r beacon 1
                     beacon1.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 1
+                    textBoxR1.setText(Double.toString(beacon1.r));
                 }
                 if (newVal.contains("y")) { //r beacon 2
                     beacon2.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 2
+                    textBoxR2.setText(Double.toString(beacon2.r));
                 }
                 if (newVal.contains("z")) { //r beacon 3
                     beacon3.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 3
+                    textBoxR3.setText(Double.toString(beacon3.r));
                 }
+
+                buttonLoad.setOnAction((ActionEvent event) ->{
+                    beacon1.x = Double.valueOf(textFieldx1.getText());
+                    beacon1.y = Double.valueOf(textFieldy1.getText());
+                    beacon2.x = Double.valueOf(textFieldx2.getText());
+                    beacon2.y = Double.valueOf(textFieldy2.getText());
+                    beacon3.x = Double.valueOf(textFieldx3.getText());
+                    beacon3.y = Double.valueOf(textFieldy3.getText());
+                });
+
+
 
                 //crossings
                 double B;
@@ -120,19 +173,6 @@ public class LocalizationController implements Initializable {
         });
 
         xDataSeries.setName("Distance");
-        bubbleChart.getData().add(xDataSeries);
-
-        new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                xDataSeries.getData().addAll(xDataCollection);
-                xNumOfSamples = xDataSeries.getData().size();
-                if (xNumOfSamples > MAX_SAMPLES)
-                    xDataSeries.getData().remove(0,
-                            xNumOfSamples - MAX_SAMPLES);
-                xDataCollection.clear();
-            }
-        }.start();
     }
 
     //functions
@@ -223,6 +263,9 @@ public class LocalizationController implements Initializable {
             public Beacon(double x, double y) {
                 this.x = x;
                 this.y = y;
+            }
+
+            public Beacon() {
             }
 
         }
