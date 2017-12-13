@@ -16,131 +16,97 @@ public class LocalizationController implements Initializable {
     private int xNumOfSamples = 0;
     private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
     private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
-    private double r1Beacon = 2.86;
-    private double x1Beacon = 4;
-    private double y1Beacon = 3;
-    private double r2Beacon = 2.99;
-    private double x2Beacon = 8;
-    private double y2Beacon = 2;
-    private double r3Beacon = 3.29;
-    private double x3Beacon = 10;
-    private double y3Beacon = 6;
-    private double x1Tag;
-    private double y1Tag;
-    private double x2Tag;
-    private double y2Tag;
-    private double x3Tag;
-    private double y3Tag;
-    private double x4Tag;
-    private double y4Tag;
-    private double xTag;
-    private double yTag;
-    double[] value1Array = new double[5];
-    double[] value2Array = new double[5];
-    double[] difArrayX = new double[6];
-    double[] difArrayY = new double[6];
-    private int remember = 0;
+    double[] beacon12Array = new double[5];
+    double[] beacon13Array = new double[5];
+    double[] beacon23Array = new double[5];
     private double discr = 1;
+
+    //variable values
+    private double rIncrement = 0.1;
+
+    //objects
+    private Beacon beacon1 = new Beacon(4,3); //remove object and constructor if this should be variable
+    private Beacon beacon2 = new Beacon(8,2);
+    private Beacon beacon3 = new Beacon(7.45,8.39);
+    private Crossing crossing12 = new Crossing();
+    private Crossing crossing13 = new Crossing();
+    private Crossing crossing23 = new Crossing();
+
     @FXML
     private BubbleChart<Number, Number> bubbleChart;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Chart and chartdata
+        //open serial port
         Serial serialPort = ContainerController.getInstance().getSerial();
+        //get radius
         serialPort.addListener((obs, oldVal, newVal) -> {
             try {
-               // System.out.println("New Value is" + newVal);
-                if (newVal.contains("x")) {
-                    //r1Beacon = Double.valueOf(newVal.replaceAll("[a-z]", ""));
+                if (newVal.contains("x")) { //r beacon 1
+                    beacon1.r = Double.valueOf(newVal.replaceAll("[a-z]", ""));
                 }
-                if (newVal.contains("y")) {
-                    //r2Beacon = Double.valueOf(newVal.replaceAll("[a-z]", ""));
+                if (newVal.contains("y")) { //r beacon 2
+                    beacon2.r = Double.valueOf(newVal.replaceAll("[a-z]", ""));
                 }
-                if (newVal.contains("z")) {
-                    //r3Beacon = Double.valueOf(newVal.replaceAll("[a-z]", ""));
+                if (newVal.contains("z")) { //r beacon 3
+                    beacon3.r = Double.valueOf(newVal.replaceAll("[a-z]", ""));
                 }
 
-                value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon, discr);
-                discr = value1Array[4];
+                //crossings
+                //beacon 1 and beacon 2
+                beacon12Array = triangulation(beacon1.y,beacon2.y,beacon1.x,beacon2.x,beacon1.r,beacon2.r, discr);
+                discr = beacon12Array[4];
                 while(discr == 0)
                 {
-                    r1Beacon = r1Beacon +0.1;
-                    r2Beacon = r2Beacon +0.1;
-                    value1Array = triangulation(y1Beacon,y2Beacon,x1Beacon,x2Beacon,r1Beacon,r2Beacon, discr);
-                    discr = value2Array[4];
+                    beacon1.r = beacon1.r + rIncrement;
+                    beacon2.r = beacon2.r + rIncrement;
+                    beacon12Array = triangulation(beacon1.y,beacon2.y,beacon1.x,beacon2.x,beacon1.r,beacon2.r, discr);
+                    discr = beacon12Array[4];
                 }
-                y1Tag = value1Array[0];
-                y2Tag = value1Array[1];
-                x1Tag = value1Array[2];
-                x2Tag = value1Array[3];
-                value2Array = triangulation(y1Beacon,y3Beacon,x1Beacon,x3Beacon,r1Beacon,r3Beacon,discr);
-                discr = value2Array[4];
-                while(discr ==0){
-                    r1Beacon = r1Beacon +0.1;
-                    r2Beacon = r2Beacon +0.1;
-                    value2Array = triangulation(y1Beacon,y3Beacon,x1Beacon,x3Beacon,r1Beacon,r3Beacon,discr);
-                    discr = value2Array[4];
-                }
-                y3Tag = value2Array[0];
-                y4Tag = value2Array[1];
-                x3Tag = value2Array[2];
-                x4Tag = value2Array[3];
-                //Calculate x value
-                difArrayX[0] = x1Tag-x2Tag;
-                difArrayX[1] = x1Tag-x3Tag;
-                difArrayX[2] = x1Tag-x4Tag;
-                difArrayX[3] = x2Tag-x3Tag;
-                difArrayX[4] = x2Tag-x4Tag;
-                difArrayX[5] = x3Tag-x4Tag;
+                crossing12.y1 = beacon12Array[0];
+                crossing12.y2 = beacon12Array[1];
+                crossing12.x1 = beacon12Array[2];
+                crossing12.x2 = beacon12Array[3];
 
-                xTag = Math.sqrt(difArrayX[0]*difArrayX[0]);;
-                int i;
-                for ( i = 1; i < 6; i++) {
-                    difArrayX[i] = Math.sqrt(difArrayX[i]*difArrayX[i]);
-                    if (xTag > difArrayX[i]){
-                        remember = i;
-                    }
+                //beacon 1 and beacon 3
+                beacon13Array = triangulation(beacon1.y,beacon3.y,beacon1.x,beacon3.x,beacon1.r,beacon3.r, discr);
+                discr = beacon13Array[4];
+                while(discr == 0)
+                {
+                    beacon1.r = beacon1.r + rIncrement;
+                    beacon3.r = beacon3.r + rIncrement;
+                    beacon13Array = triangulation(beacon1.y,beacon3.y,beacon1.x,beacon3.x,beacon1.r,beacon3.r, discr);
+                    discr = beacon13Array[4];
                 }
-                if(remember==0 | remember==1 | remember==2){
-                    xTag = x1Tag;
-                }
-                else if(remember==3 | remember==4){
-                    xTag = x2Tag;
-                }
-                else{
-                    xTag = x3Tag;
-                }
+                crossing13.y1 = beacon13Array[0];
+                crossing13.y2 = beacon13Array[1];
+                crossing13.x1 = beacon13Array[2];
+                crossing13.x2 = beacon13Array[3];
 
-                difArrayY[0] = y1Tag-y2Tag;
-                difArrayY[1] = y1Tag-y3Tag;
-                difArrayY[2] = y1Tag-y4Tag;
-                difArrayY[3] = y2Tag-y3Tag;
-                difArrayY[4] = y2Tag-y4Tag;
-                difArrayY[5] = y3Tag-y4Tag;
-
-                yTag = Math.sqrt(difArrayY[0]*difArrayY[0]);;
-                int p;
-                for ( p = 1; p < 6; p++) {
-                    difArrayY[p] = Math.sqrt(difArrayY[p]*difArrayY[p]);
-                    if (yTag > difArrayY[p]){
-                        remember = p;
-                    }
+                //beacon 2 and beacon 3
+                beacon23Array = triangulation(beacon2.y,beacon3.y,beacon2.x,beacon3.x,beacon2.r,beacon3.r, discr);
+                discr = beacon23Array[4];
+                while(discr == 0)
+                {
+                    beacon2.r = beacon2.r + rIncrement;
+                    beacon3.r = beacon3.r + rIncrement;
+                    beacon23Array = triangulation(beacon2.y,beacon3.y,beacon2.x,beacon3.x,beacon2.r,beacon3.r, discr);
+                    discr = beacon23Array[4];
                 }
-                if(remember==0 | remember==1 | remember==2){
-                    yTag = y1Tag;
-                }
-                else if(remember==3 | remember==4){
-                    yTag = y2Tag;
-                }
-                else{
-                    yTag = y3Tag;
-                }
+                crossing23.y1 = beacon23Array[0];
+                crossing23.y2 = beacon23Array[1];
+                crossing23.x1 = beacon23Array[2];
+                crossing23.x2 = beacon23Array[3];
 
-                System.out.println("c1 ( " + xTag + "," + yTag + " )");
+                //closed crossing
+                crossing23 = determineR(crossing23.y1, crossing23.y2, crossing23.x1, crossing23.x2, beacon1.y, beacon1.x); //between crossing23 and beacon1
+                crossing13 = determineR(crossing13.y1, crossing13.y2, crossing13.x1, crossing13.x2, beacon2.y, beacon2.x); //between crossing13 and beacon2
+                crossing12 = determineR(crossing12.y1, crossing12.y2, crossing12.x1, crossing12.x2, beacon3.y, beacon3.x); //between crossing12 and beacon3
 
-
-
+                //print
+                System.out.println("crossing23(" + String.format("%.2f", crossing23.x1) +"," + String.format("%.2f",crossing23.y1) + ")");
+                System.out.println("crossing13(" + String.format("%.2f", crossing13.x1) +"," + String.format("%.2f",crossing13.y1) + ")");
+                System.out.println("crossing12(" + String.format("%.2f", crossing12.x1) +"," + String.format("%.2f",crossing12.y1) + ")");
 
             } catch (NumberFormatException e) {
                 e.printStackTrace(System.err);
@@ -165,7 +131,34 @@ public class LocalizationController implements Initializable {
         }.start();
     }
 
-        double [] triangulation (double y1Coordinate, double y2Coordinate, double x1Coordinate, double x2Coordinate, double r1Coordinate, double r2Coordinate, double discriminant)
+    //functions
+    private Crossing determineR (double y1, double y2, double x1, double x2, double beaconY, double beaconX)
+    {
+        double a1;
+        double b1;
+        double r1;
+        double a2;
+        double b2;
+        double r2;
+
+        a1 = beaconX - x1;
+        b1 = beaconY - y1;
+        r1 = Math.sqrt(a1 * a1 + b1 *b1);
+
+        a2 = beaconX - x2;
+        b2 = beaconY - y2;
+        r2 = Math.sqrt(a2 * a2 + b2 *b2);
+
+        if (r1 < r2){
+            return new Crossing(x1,y1);
+        }
+        else
+        {
+            return new Crossing(x2,y2);
+        }
+
+    }
+    double [] triangulation (double y1Coordinate, double y2Coordinate, double x1Coordinate, double x2Coordinate, double r1Coordinate, double r2Coordinate, double discriminant)
         {
             double A;
             double B;
@@ -192,7 +185,7 @@ public class LocalizationController implements Initializable {
             //Finding out the roots
 
             double D1 = y1 * y1 - 4 * y2 * y0;
-            if (D1 >= 0)
+            if (D1 > 0)
             {
                 D1 = Math.sqrt(D1);
                 y1Tag = (-y1 + D1) / (2 * y2);
@@ -201,7 +194,6 @@ public class LocalizationController implements Initializable {
                 x1Tag = (C * y1Tag + A) / B;
                 x2Tag = (C * y2Tag + A) / B;
 
-                // System.out.println("The roots of the Quadratic Equation \"2x2 + 6x + 4 = 0\" are " + y1Tag + " and " + y2Tag);
                 array[0] = y1Tag;
                 array[1] = y2Tag;
                 array[2] = x1Tag;
@@ -217,4 +209,34 @@ public class LocalizationController implements Initializable {
             }
         }
 
+        //classes
+        private static class Beacon {
+            public double x = 0;
+            public double y = 0;
+            public double r = 0;
+
+            public Beacon(double x, double y) {
+                this.x = x;
+                this.y = y;
+            }
+
+        }
+        private static class Crossing{
+            //properties
+            public double x1 = 0;
+            public double y1 = 0;
+            public double x2 = 0;
+            public double y2 = 0;
+
+            //constructors
+            //all crossings
+            public Crossing() {
+            }
+
+            //closed crossing
+            public Crossing(double x1, double y1) {
+                this.x1 = x1;
+                this.y1 = y1;
+            }
+        }
 }
