@@ -5,10 +5,11 @@ import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.chart.BubbleChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
@@ -48,8 +49,13 @@ public class LocalizationController implements Initializable {
     @FXML
     private Button buttonLoad;
 
+    @FXML
+    private BubbleChart<Number, Number> bubbleChart;
+
     private final static int MAX_SAMPLES = 40;
     private int xNumOfSamples = 0;
+    final NumberAxis xAxis = new NumberAxis(0, 50, 4);
+    final NumberAxis yAxis = new NumberAxis(0, 50, 10);
     private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
     private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
     double[] beacon12Array = new double[5];
@@ -75,6 +81,7 @@ public class LocalizationController implements Initializable {
         textFieldy1.setText(Double.toString(beacon1.y));
         textFieldy2.setText(Double.toString(beacon2.y));
         textFieldy3.setText(Double.toString(beacon3.y));
+        bubbleChart.getData().addAll(xDataSeries);
         //open serial port
         Serial serialPort = ContainerController.getInstance().getSerial();
         //get radius between beacons and tag
@@ -101,9 +108,10 @@ public class LocalizationController implements Initializable {
                     beacon2.y = Double.valueOf(textFieldy2.getText());
                     beacon3.x = Double.valueOf(textFieldx3.getText());
                     beacon3.y = Double.valueOf(textFieldy3.getText());
+                    xDataCollection.add(new XYChart.Data<>(beacon1.x,beacon1.y, beacon1.r));
+                    xDataCollection.add(new XYChart.Data<>(beacon2.x,beacon2.y, beacon2.r));
+                    xDataCollection.add(new XYChart.Data<>(beacon3.x,beacon3.y, beacon3.r));
                 });
-
-
 
                 //crossings
                 double B;
@@ -155,7 +163,6 @@ public class LocalizationController implements Initializable {
                     crossing23.x2 = beacon23Array[3];
                 }
 
-
                 //closest crossing
                 crossing23 = determineR(crossing23.y1, crossing23.y2, crossing23.x1, crossing23.x2, beacon1.y, beacon1.x); //between crossing23 and beacon1
                 crossing13 = determineR(crossing13.y1, crossing13.y2, crossing13.x1, crossing13.x2, beacon2.y, beacon2.x); //between crossing13 and beacon2
@@ -172,7 +179,17 @@ public class LocalizationController implements Initializable {
             }
         });
 
-        xDataSeries.setName("Distance");
+        new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                xDataSeries.getData().addAll(xDataCollection);
+                xNumOfSamples = xDataSeries.getData().size();
+                if(xNumOfSamples > MAX_SAMPLES)
+                    xDataSeries.getData().remove(0,
+                            xNumOfSamples - MAX_SAMPLES);
+                xDataCollection.clear();
+            }
+        }.start();
     }
 
     //functions
