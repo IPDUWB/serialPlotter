@@ -85,10 +85,10 @@
                <children>
                   <BubbleChart fx:id="bubbleChart" prefHeight="713.0" prefWidth="828.0">
                     <xAxis>
-                      <NumberAxis autoRanging="false" side="BOTTOM" upperBound="170.0" />
+                      <NumberAxis autoRanging="false" side="BOTTOM" upperBound="40.0" />
                     </xAxis>
                     <yAxis>
-                      <NumberAxis autoRanging="false" side="LEFT" />
+                      <NumberAxis autoRanging="false" side="LEFT" upperBound="40.0" />
                     </yAxis>
                   </BubbleChart>
                </children>

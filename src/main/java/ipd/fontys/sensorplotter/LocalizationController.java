@@ -113,14 +113,7 @@ public class LocalizationController implements Initializable {
                     beacon3.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 3
                     dataLoaded[2] = true;
                 }
-                buttonLoad.setOnAction((ActionEvent event) ->{
-                    beacon1.x = Double.valueOf(textFieldx1.getText());
-                    beacon1.y = Double.valueOf(textFieldy1.getText());
-                    beacon2.x = Double.valueOf(textFieldx2.getText());
-                    beacon2.y = Double.valueOf(textFieldy2.getText());
-                    beacon3.x = Double.valueOf(textFieldx3.getText());
-                    beacon3.y = Double.valueOf(textFieldy3.getText());
-                });
+
 
                 if (dataLoaded[0] == true && dataLoaded[1] == true && dataLoaded[2] == true) {
                     change = true;
@@ -210,18 +203,15 @@ public class LocalizationController implements Initializable {
                     System.out.println("crossing13(" + String.format("%.2f", crossing13.x1) + "," + String.format("%.2f", crossing13.y1) + ")"); //coordinate 2
                     System.out.println("crossing12(" + String.format("%.2f", crossing12.x1) + "," + String.format("%.2f", crossing12.y1) + ")"); //coordinate 3
 
-                    beacon1Collection.add(new XYChart.Data<>(beacon1.x, beacon1.y, beacon1.r));
+                    /*beacon1Collection.add(new XYChart.Data<>(beacon1.x, beacon1.y, beacon1.r));
                     beacon2Collection.add(new XYChart.Data<>(beacon2.x, beacon2.y, beacon2.r));
-                    beacon3Collection.add(new XYChart.Data<>(beacon3.x, beacon3.y, beacon3.r));
+                    beacon3Collection.add(new XYChart.Data<>(beacon3.x, beacon3.y, beacon3.r));*/
                     beacon1Collection.add(new XYChart.Data<>(beacon1.x, beacon1.y, 0.5));
                     beacon2Collection.add(new XYChart.Data<>(beacon2.x, beacon2.y, 0.5));
                     beacon3Collection.add(new XYChart.Data<>(beacon3.x, beacon3.y, 0.5));
                     textBoxR1.setText(Double.toString(beacon1.r));
                     textBoxR2.setText(Double.toString(beacon2.r));
                     textBoxR3.setText(Double.toString(beacon3.r));
-                    beacon1Series.getData().remove(0, xNumOfSamples);
-                    beacon2Series.getData().remove(0, xNumOfSamples);
-                    beacon3Series.getData().remove(0, xNumOfSamples);
                     dataLoaded[0] = false;
                     dataLoaded[1] = false;
                     dataLoaded[2] = false;
@@ -236,9 +226,12 @@ public class LocalizationController implements Initializable {
         new AnimationTimer() {
             @Override
             public void handle(long l) {
-                beacon1Series.getData().addAll(beacon1Collection);
-                beacon2Series.getData().addAll(beacon2Collection);
-                beacon3Series.getData().addAll(beacon3Collection);
+//                beacon1Series.getData().addAll(beacon1Collection);
+                if(beacon1Collection.size() == 0)
+                    return;
+                beacon2Series.getData().setAll(beacon2Collection);
+                beacon3Series.getData().setAll(beacon3Collection);
+                beacon1Series.getData().setAll(beacon1Collection);
                 xNumOfSamples = beacon1Series.getData().size();
                 if(xNumOfSamples > MAX_SAMPLES)
                     beacon1Series.getData().remove(0,
@@ -248,6 +241,16 @@ public class LocalizationController implements Initializable {
                 beacon3Collection.clear();
             }
         }.start();
+
+        buttonLoad.setOnAction((ActionEvent event) -> {
+            beacon1.x = Double.valueOf(textFieldx1.getText());
+            beacon1.y = Double.valueOf(textFieldy1.getText());
+            beacon2.x = Double.valueOf(textFieldx2.getText());
+            beacon2.y = Double.valueOf(textFieldy2.getText());
+            beacon3.x = Double.valueOf(textFieldx3.getText());
+            beacon3.y = Double.valueOf(textFieldy3.getText());
+            change = false;
+        });
     }
 
     //functions
@@ -304,8 +307,8 @@ public class LocalizationController implements Initializable {
                 dOk = 1;
             }
             else {
-                r1Coordinate = r1Coordinate + rIncrement;
-                r2Coordinate = r2Coordinate + rIncrement;
+                r1Coordinate +=  rIncrement;
+                r2Coordinate +=  rIncrement;
                 cha = true;
                 dOk = 0;
             }
