@@ -5,7 +5,6 @@ import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.chart.BubbleChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -56,11 +55,20 @@ public class LocalizationController implements Initializable {
     private int xNumOfSamples = 0;
     final NumberAxis xAxis = new NumberAxis(0, 50, 4);
     final NumberAxis yAxis = new NumberAxis(0, 50, 10);
-    private final XYChart.Series<Number, Number> xDataSeries = new XYChart.Series<>();
-    private final Collection<XYChart.Data<Number, Number>> xDataCollection = new CopyOnWriteArrayList<>();
-    double[] beacon12Array = new double[5];
-    double[] beacon13Array = new double[5];
-    double[] beacon23Array = new double[5];
+    private final XYChart.Series<Number, Number> beacon1Series = new XYChart.Series<>();
+    private final Collection<XYChart.Data<Number, Number>> beacon1Collection = new CopyOnWriteArrayList<>();
+    private final XYChart.Series<Number, Number> beacon2Series = new XYChart.Series<>();
+    private final Collection<XYChart.Data<Number, Number>> beacon2Collection = new CopyOnWriteArrayList<>();
+    private final XYChart.Series<Number, Number> beacon3Series = new XYChart.Series<>();
+    private final Collection<XYChart.Data<Number, Number>> beacon3Collection = new CopyOnWriteArrayList<>();
+    double[] beacon12Array = new double[7];
+    double[] beacon13Array = new double[7];
+    double[] beacon23Array = new double[7];
+    boolean change = true;
+    double rChanged = 1.0;
+
+    private boolean[] dataLoaded = new boolean[3];
+
 
     //variable values
     private double rIncrement = 0.1;
@@ -81,7 +89,12 @@ public class LocalizationController implements Initializable {
         textFieldy1.setText(Double.toString(beacon1.y));
         textFieldy2.setText(Double.toString(beacon2.y));
         textFieldy3.setText(Double.toString(beacon3.y));
-        bubbleChart.getData().addAll(xDataSeries);
+        bubbleChart.getData().addAll(beacon1Series);
+        bubbleChart.getData().addAll(beacon2Series);
+        bubbleChart.getData().addAll(beacon3Series);
+        beacon1Series.setName("Beacon 1");
+        beacon2Series.setName("Beacon 2");
+        beacon3Series.setName("Beacon 3");
         //open serial port
         Serial serialPort = ContainerController.getInstance().getSerial();
         //get radius between beacons and tag
@@ -90,17 +103,16 @@ public class LocalizationController implements Initializable {
 
                 if (newVal.contains("x")) { //r beacon 1
                     beacon1.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 1
-                    textBoxR1.setText(Double.toString(beacon1.r));
+                    dataLoaded[0] = true;
                 }
                 if (newVal.contains("y")) { //r beacon 2
                     beacon2.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 2
-                    textBoxR2.setText(Double.toString(beacon2.r));
+                    dataLoaded[1] = true;
                 }
                 if (newVal.contains("z")) { //r beacon 3
                     beacon3.r = Double.valueOf(newVal.replaceAll("[a-z]", "")); //r beacon 3
-                    textBoxR3.setText(Double.toString(beacon3.r));
+                    dataLoaded[2] = true;
                 }
-
                 buttonLoad.setOnAction((ActionEvent event) ->{
                     beacon1.x = Double.valueOf(textFieldx1.getText());
                     beacon1.y = Double.valueOf(textFieldy1.getText());
@@ -108,86 +120,132 @@ public class LocalizationController implements Initializable {
                     beacon2.y = Double.valueOf(textFieldy2.getText());
                     beacon3.x = Double.valueOf(textFieldx3.getText());
                     beacon3.y = Double.valueOf(textFieldy3.getText());
-                    xDataCollection.add(new XYChart.Data<>(beacon1.x,beacon1.y, beacon1.r));
-                    xDataCollection.add(new XYChart.Data<>(beacon2.x,beacon2.y, beacon2.r));
-                    xDataCollection.add(new XYChart.Data<>(beacon3.x,beacon3.y, beacon3.r));
                 });
 
-                //crossings
-                double B;
-                B = -2 * (beacon1.x - beacon2.x);
-                if (B == 0){
-                    beacon12Array = triangulation(beacon1.x, beacon2.x, beacon1.y, beacon2.y, beacon1.r, beacon2.r, rIncrement);  //beacon 1 and beacon 2
-                    crossing12.x1 = beacon12Array[0];
-                    crossing12.x2 = beacon12Array[1];
-                    crossing12.y1 = beacon12Array[2];
-                    crossing12.y2 = beacon12Array[3];
-                }
-                else {
-                    beacon12Array = triangulation(beacon1.y, beacon2.y, beacon1.x, beacon2.x, beacon1.r, beacon2.r, rIncrement);
-                    crossing12.y1 = beacon12Array[0];
-                    crossing12.y2 = beacon12Array[1];
-                    crossing12.x1 = beacon12Array[2];
-                    crossing12.x2 = beacon12Array[3];
-                }
+                if (dataLoaded[0] == true && dataLoaded[1] == true && dataLoaded[2] == true) {
+                    change = true;
+                    while ( change == true) {
+                        change = false;
+                        //crossings
+                        double B;
+                        B = -2 * (beacon1.x - beacon2.x);
+                        if (B == 0) {
+                            beacon12Array = triangulation(beacon1.x, beacon2.x, beacon1.y, beacon2.y, beacon1.r, beacon2.r, rIncrement);  //beacon 1 and beacon 2
+                            crossing12.x1 = beacon12Array[0];
+                            crossing12.x2 = beacon12Array[1];
+                            crossing12.y1 = beacon12Array[2];
+                            crossing12.y2 = beacon12Array[3];
+                            beacon1.r = beacon12Array[4];
+                            beacon2.r = beacon12Array[5];
+                        } else {
+                            beacon12Array = triangulation(beacon1.y, beacon2.y, beacon1.x, beacon2.x, beacon1.r, beacon2.r, rIncrement);
+                            crossing12.y1 = beacon12Array[0];
+                            crossing12.y2 = beacon12Array[1];
+                            crossing12.x1 = beacon12Array[2];
+                            crossing12.x2 = beacon12Array[3];
+                            beacon1.r = beacon12Array[4];
+                            beacon2.r = beacon12Array[5];
 
-                B = -2 * (beacon1.x - beacon3.x);
-                if (B == 0){
-                    beacon13Array = triangulation(beacon1.x, beacon3.x, beacon1.y, beacon3.y, beacon1.r, beacon3.r, rIncrement);  //beacon 1 and beacon 2
-                    crossing13.x1 = beacon13Array[0];
-                    crossing13.x2 = beacon13Array[1];
-                    crossing13.y1 = beacon13Array[2];
-                    crossing13.y2 = beacon13Array[3];
-                }
-                else {
-                    beacon13Array = triangulation(beacon1.y, beacon3.y, beacon1.x, beacon3.x, beacon1.r, beacon3.r, rIncrement);
-                    crossing13.y1 = beacon13Array[0];
-                    crossing13.y2 = beacon13Array[1];
-                    crossing13.x1 = beacon13Array[2];
-                    crossing13.x2 = beacon13Array[3];
-                }
+                        }
 
-                B = -2 * (beacon2.x - beacon3.x);
-                if (B == 0){
-                    beacon23Array = triangulation(beacon2.x, beacon3.x, beacon2.y, beacon3.y, beacon2.r, beacon3.r, rIncrement);  //beacon 2 and beacon 3
-                    crossing23.x1 = beacon23Array[0];
-                    crossing23.x2 = beacon23Array[1];
-                    crossing23.y1 = beacon23Array[2];
-                    crossing23.y2 = beacon23Array[3];
+                        B = -2 * (beacon1.x - beacon3.x);
+                        if (B == 0) {
+                            beacon13Array = triangulation(beacon1.x, beacon3.x, beacon1.y, beacon3.y, beacon1.r, beacon3.r, rIncrement);  //beacon 1 and beacon 3
+                            crossing13.x1 = beacon13Array[0];
+                            crossing13.x2 = beacon13Array[1];
+                            crossing13.y1 = beacon13Array[2];
+                            crossing13.y2 = beacon13Array[3];
+                            beacon1.r = beacon13Array[4];
+                            beacon3.r = beacon13Array[5];
+
+
+                        } else {
+                            beacon13Array = triangulation(beacon1.y, beacon3.y, beacon1.x, beacon3.x, beacon1.r, beacon3.r, rIncrement);
+                            crossing13.y1 = beacon13Array[0];
+                            crossing13.y2 = beacon13Array[1];
+                            crossing13.x1 = beacon13Array[2];
+                            crossing13.x2 = beacon13Array[3];
+                            beacon1.r = beacon13Array[4];
+                            beacon3.r = beacon13Array[5];
+                        }
+
+                        rChanged = beacon12Array[6];
+                        if (rChanged > 0)
+                        {
+                            change = true;
+                        }
+
+                        B = -2 * (beacon2.x - beacon3.x);
+                        if (B == 0) {
+                            beacon23Array = triangulation(beacon2.x, beacon3.x, beacon2.y, beacon3.y, beacon2.r, beacon3.r, rIncrement);  //beacon 2 and beacon 3
+                            crossing23.x1 = beacon23Array[0];
+                            crossing23.x2 = beacon23Array[1];
+                            crossing23.y1 = beacon23Array[2];
+                            crossing23.y2 = beacon23Array[3];
+                            beacon2.r = beacon23Array[4];
+                            beacon3.r = beacon23Array[5];
+                        } else {
+                            beacon23Array = triangulation(beacon2.y, beacon3.y, beacon2.x, beacon3.x, beacon2.r, beacon3.r, rIncrement);
+                            crossing23.y1 = beacon23Array[0];
+                            crossing23.y2 = beacon23Array[1];
+                            crossing23.x1 = beacon23Array[2];
+                            crossing23.x2 = beacon23Array[3];
+                            beacon2.r = beacon23Array[4];
+                            beacon3.r = beacon23Array[5];
+                        }
+                        rChanged = beacon23Array[6];
+                        if (rChanged > 0)
+                        {
+                            change = true;
+                        }
+                    }
+
+                    //closest crossing
+                    crossing23 = determineR(crossing23.y1, crossing23.y2, crossing23.x1, crossing23.x2, beacon1.y, beacon1.x); //between crossing23 and beacon1
+                    crossing13 = determineR(crossing13.y1, crossing13.y2, crossing13.x1, crossing13.x2, beacon2.y, beacon2.x); //between crossing13 and beacon2
+                    crossing12 = determineR(crossing12.y1, crossing12.y2, crossing12.x1, crossing12.x2, beacon3.y, beacon3.x); //between crossing12 and beacon3
+
+                    //print
+                    System.out.println("crossing23(" + String.format("%.2f", crossing23.x1) + "," + String.format("%.2f", crossing23.y1) + ")"); //coordinate 1
+                    System.out.println("crossing13(" + String.format("%.2f", crossing13.x1) + "," + String.format("%.2f", crossing13.y1) + ")"); //coordinate 2
+                    System.out.println("crossing12(" + String.format("%.2f", crossing12.x1) + "," + String.format("%.2f", crossing12.y1) + ")"); //coordinate 3
+
+                    beacon1Collection.add(new XYChart.Data<>(beacon1.x, beacon1.y, beacon1.r));
+                    beacon2Collection.add(new XYChart.Data<>(beacon2.x, beacon2.y, beacon2.r));
+                    beacon3Collection.add(new XYChart.Data<>(beacon3.x, beacon3.y, beacon3.r));
+                    beacon1Collection.add(new XYChart.Data<>(beacon1.x, beacon1.y, 0.5));
+                    beacon2Collection.add(new XYChart.Data<>(beacon2.x, beacon2.y, 0.5));
+                    beacon3Collection.add(new XYChart.Data<>(beacon3.x, beacon3.y, 0.5));
+                    textBoxR1.setText(Double.toString(beacon1.r));
+                    textBoxR2.setText(Double.toString(beacon2.r));
+                    textBoxR3.setText(Double.toString(beacon3.r));
+                    beacon1Series.getData().remove(0, xNumOfSamples);
+                    beacon2Series.getData().remove(0, xNumOfSamples);
+                    beacon3Series.getData().remove(0, xNumOfSamples);
+                    dataLoaded[0] = false;
+                    dataLoaded[1] = false;
+                    dataLoaded[2] = false;
                 }
-                else {
-                    beacon23Array = triangulation(beacon2.y, beacon3.y, beacon2.x, beacon3.x, beacon2.r, beacon3.r, rIncrement);
-                    crossing23.y1 = beacon23Array[0];
-                    crossing23.y2 = beacon23Array[1];
-                    crossing23.x1 = beacon23Array[2];
-                    crossing23.x2 = beacon23Array[3];
-                }
-
-                //closest crossing
-                crossing23 = determineR(crossing23.y1, crossing23.y2, crossing23.x1, crossing23.x2, beacon1.y, beacon1.x); //between crossing23 and beacon1
-                crossing13 = determineR(crossing13.y1, crossing13.y2, crossing13.x1, crossing13.x2, beacon2.y, beacon2.x); //between crossing13 and beacon2
-                crossing12 = determineR(crossing12.y1, crossing12.y2, crossing12.x1, crossing12.x2, beacon3.y, beacon3.x); //between crossing12 and beacon3
-
-                //print
-                System.out.println("crossing23(" + String.format("%.2f", crossing23.x1) +"," + String.format("%.2f",crossing23.y1) + ")"); //coordinate 1
-                System.out.println("crossing13(" + String.format("%.2f", crossing13.x1) +"," + String.format("%.2f",crossing13.y1) + ")"); //coordinate 2
-                System.out.println("crossing12(" + String.format("%.2f", crossing12.x1) +"," + String.format("%.2f",crossing12.y1) + ")"); //coordinate 3
-
             } catch (NumberFormatException e) {
                 e.printStackTrace(System.err);
 
             }
         });
 
+
         new AnimationTimer() {
             @Override
             public void handle(long l) {
-                xDataSeries.getData().addAll(xDataCollection);
-                xNumOfSamples = xDataSeries.getData().size();
+                beacon1Series.getData().addAll(beacon1Collection);
+                beacon2Series.getData().addAll(beacon2Collection);
+                beacon3Series.getData().addAll(beacon3Collection);
+                xNumOfSamples = beacon1Series.getData().size();
                 if(xNumOfSamples > MAX_SAMPLES)
-                    xDataSeries.getData().remove(0,
+                    beacon1Series.getData().remove(0,
                             xNumOfSamples - MAX_SAMPLES);
-                xDataCollection.clear();
+                beacon1Collection.clear();
+                beacon2Collection.clear();
+                beacon3Collection.clear();
             }
         }.start();
     }
@@ -204,12 +262,13 @@ public class LocalizationController implements Initializable {
         double y0;
 
         double[] array;
-        array = new double[4];
+        array = new double[7];
         double y1Tag;
         double y2Tag;
         double x1Tag;
         double x2Tag;
         int dOk = 0;
+        boolean cha = false;
 
         while (dOk == 0) {
             A = (r1Coordinate * r1Coordinate) - (r2Coordinate * r2Coordinate) - ((x1Coordinate * x1Coordinate) - (x2Coordinate * x2Coordinate)) - ((y1Coordinate * y1Coordinate) - (y2Coordinate * y2Coordinate));
@@ -234,10 +293,20 @@ public class LocalizationController implements Initializable {
                 array[1] = y2Tag;
                 array[2] = x1Tag;
                 array[3] = x2Tag;
+                array[4] = r1Coordinate;
+                array[5] = r2Coordinate;
+                if (cha == true){
+                    array[6] = 1.0;
+                }
+                else{
+                    array[6] = 0.0;
+                }
                 dOk = 1;
-            } else {
+            }
+            else {
                 r1Coordinate = r1Coordinate + rIncrement;
                 r2Coordinate = r2Coordinate + rIncrement;
+                cha = true;
                 dOk = 0;
             }
         }
